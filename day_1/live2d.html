@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live2D 캐릭터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        #canvas {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #667eea;
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            color: #555;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎀 Live2D 캐릭터</h1>
+        <p class="subtitle">인터랙티브 3D 캐릭터</p>
+        
+        <canvas id="canvas"></canvas>
+        
+        <div class="controls">
+            <button onclick="moveCharacter('left')">← 왼쪽</button>
+            <button onclick="moveCharacter('right')">오른쪽 →</button>
+            <button onclick="animate('wave')">손 흔들기 👋</button>
+            <button onclick="animate('blink')">눈 깜빡임 👀</button>
+            <button onclick="animate('jump')">점프 🎪</button>
+        </div>
+        
+        <div class="info">
+            <p>💡 버튼을 클릭하여 캐릭터와 상호작용하세요!</p>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 캔버스 크기 설정
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // 캐릭터 객체
+        const character = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            width: 100,
+            height: 120,
+            blinkFrame: 0,
+            waveFrame: 0,
+            jumpFrame: 0,
+            isWaving: false,
+            isBlinking: false,
+            isJumping: false,
+            jumpPower: 0
+        };
+        
+        // 캐릭터 그리기
+        function drawCharacter() {
+            // 몸
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.ellipse(character.x, character.y, character.width / 2, character.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 머리
+            ctx.fillStyle = '#FFD4E5';
+            ctx.beginPath();
+            ctx.arc(character.x, character.y - 60, 45, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 귀
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.arc(character.x - 35, character.y - 90, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(character.x + 35, character.y - 90, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 눈 (깜빡임 애니메이션)
+            ctx.fillStyle = '#333';
+            let eyeHeight = character.isBlinking ? 2 : 15;
+            ctx.beginPath();
+            ctx.ellipse(character.x - 15, character.y - 65, 8, eyeHeight, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(character.x + 15, character.y - 65, 8, eyeHeight, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 눈동자
+            if (!character.isBlinking) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(character.x - 15, character.y - 65, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(character.x + 15, character.y - 65, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 입
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(character.x, character.y - 45, 10, 0, Math.PI);
+            ctx.stroke();
+            
+            // 팔 (흔들기 애니메이션)
+            ctx.strokeStyle = '#FFB6C1';
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            
+            let leftArmAngle = character.isWaving ? Math.sin(character.waveFrame * 0.3) * 0.5 : 0;
+            let rightArmAngle = character.isWaving ? -Math.sin(character.waveFrame * 0.3) * 0.5 : 0;
+            
+            // 왼쪽 팔
+            ctx.beginPath();
+            ctx.moveTo(character.x - 40, character.y - 20);
+            ctx.lineTo(character.x - 80 + Math.cos(leftArmAngle) * 30, character.y - 20 + Math.sin(leftArmAngle) * 30);
+            ctx.stroke();
+            
+            // 오른쪽 팔
+            ctx.beginPath();
+            ctx.moveTo(character.x + 40, character.y - 20);
+            ctx.lineTo(character.x + 80 + Math.cos(rightArmAngle + Math.PI) * 30, character.y - 20 + Math.sin(rightArmAngle + Math.PI) * 30);
+            ctx.stroke();
+            
+            // 다리
+            ctx.beginPath();
+            ctx.moveTo(character.x - 25, character.y + 60);
+            ctx.lineTo(character.x - 25, character.y + 100);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(character.x + 25, character.y + 60);
+            ctx.lineTo(character.x + 25, character.y + 100);
+            ctx.stroke();
+        }
+        
+        // 애니메이션 업데이트
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 배경 그래디언트
+            let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 구름 그리기
+            drawClouds();
+            
+            // 점프 애니메이션
+            if (character.isJumping) {
+                character.jumpFrame++;
+                character.y = character.y - Math.sin(character.jumpFrame / 10) * 100;
+                if (character.jumpFrame > 30) {
+                    character.isJumping = false;
+                    character.jumpFrame = 0;
+                    character.y = canvas.height / 2;
+                }
+            }
+            
+            // 깜빡임 애니메이션
+            if (character.isBlinking) {
+                character.blinkFrame++;
+                if (character.blinkFrame > 5) {
+                    character.isBlinking = false;
+                    character.blinkFrame = 0;
+                }
+            }
+            
+            // 손 흔들기 애니메이션
+            if (character.isWaving) {
+                character.waveFrame++;
+                if (character.waveFrame > 40) {
+                    character.isWaving = false;
+                    character.waveFrame = 0;
+                }
+            }
+            
+            drawCharacter();
+            requestAnimationFrame(update);
+        }
+        
+        // 구름 그리기
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            drawCloud(100, 50, 60);
+            drawCloud(canvas.width - 100, 80, 50);
+            drawCloud(canvas.width / 2, 30, 70);
+        }
+        
+        function drawCloud(x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x - size, y, size / 2, 0, Math.PI * 2);
+            ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
+            ctx.arc(x + size, y, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 캐릭터 이동
+        function moveCharacter(direction) {
+            const step = 30;
+            if (direction === 'left') {
+                character.x = Math.max(character.width / 2 + 20, character.x - step);
+            } else if (direction === 'right') {
+                character.x = Math.min(canvas.width - character.width / 2 - 20, character.x + step);
+            }
+        }
+        
+        // 애니메이션 실행
+        function animate(type) {
+            switch(type) {
+                case 'wave':
+                    character.isWaving = true;
+                    break;
+                case 'blink':
+                    character.isBlinking = true;
+                    break;
+                case 'jump':
+                    character.isJumping = true;
+                    break;
+            }
+        }
+        
+        // 애니메이션 시작
+        update();
+    </script>
+</body>
+</html>

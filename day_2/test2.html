@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      //   let age = prompt("나이를 입력하세요");
+      //   age = Number(age);
+      //   let price = 3000; //기본 가격 지정
+      //   if (isNaN(age) || age <= 0) {
+      //     price = "숫자를 입력해";
+      //   } else if (age >= 65 || age <= 7) {
+      //     price = 0; //새로 값 지정
+      //   } else if (age <= 18 && age >= 8) {
+      //     price = 1000;
+      //   }
+
+      //   document.write(`${price.toLocaleString()}원 입니다.`);
+      for (let dan = 2; dan < 10; dan++) {
+        document.write(`<h2>${dan}단</h2>`);
+        for (let i = 1; i < 10; i++) {
+          document.writeln(`${dan} X ${i} = ${dan * i} <br/>`);
+        }
+      }
+    </script>
+  </body>
+</html>

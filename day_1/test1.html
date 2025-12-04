@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      h1 {
+        background-color: red;
+        padding: 15px;
+        text-align: center;
+      }
+
+      h2 {
+        background-color: orange;
+        padding: 15px;
+        text-align: center;
+      }
+      h3 {
+        background-color: yellow;
+        padding: 15px;
+        text-align: center;
+      }
+      h4 {
+        background-color: green;
+        padding: 15px;
+        text-align: center;
+      }
+      h5 {
+        background-color: blue;
+        padding: 15px;
+        text-align: center;
+      }
+      h6 {
+        background-color: purple;
+        padding: 15px;
+        text-align: center;
+      }
+      button {
+        font-size: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">염</h1>
+    <h2>기</h2>
+    <h3>의</h3>
+    <h4></h4>
+    <h5>아</h5>
+    <h6 id="ko" onmouseenter="onMouseEnter()" onmouseleave="onMouseLeave()">
+      이
+    </h6>
+    <a href="https://www.naver.com/" target="_blank">네이버</a>
+    <button onclick="onClick()">클릭</button>
+
+    <!-- <script src="random.js"></script> -->
+    <script></script>
+    <script src="test1.js">
+      function onClick(){
+          // let ret = confirm("안녕하세요")
+          // console.log(ret);
+
+          let name =prompt("이름 입력");
+          console.log(name)
+
+          // document.getElementById("title").innerText = "클릭되었습니다.";
+          // document.getElementById('title').style.color = "blue";
+      }
+      function onMouseEnter(){
+          // document.getElementById("ko").innerText = "색깔 변경됨";
+          // document.getElementById("ko").style.color = "white";
+      }
+      function onMouseLeave(){
+          document.getElementById("ko").innerText = "이";
+          document.getElementById("ko").style.color = "black";
+      }
+    </script>
+  </body>
+</html>
