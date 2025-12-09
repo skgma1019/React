@@ -54,17 +54,27 @@ exports.saveResult = async (req, res) => {
 // 3. 랭킹 조회
 exports.getRanks = async (req, res) => {
   try {
-    // 1. 페이지 설정 (기본 1페이지, 20개씩 보기)
+    // 1. 파라미터 받기
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    // 2. DB 조회 (승률 계산과 정렬을 동시에!)
+    // 👇 [추가됨] 장르 ID 받기 (없으면 전체 조회)
+    const genre = req.query.genre;
+
+    // 2. 필터 조건 만들기
+    let whereCondition = {};
+    if (genre && genre !== "ALL") {
+      // JSON 배열 안에 해당 장르 ID가 있는지 검사 (MySQL 전용 함수)
+      whereCondition = Sequelize.literal(`JSON_CONTAINS(genreIds, '${genre}')`);
+    }
+
+    // 3. DB 조회 (장르 필터 + 승률 계산 + 정렬)
     const { count, rows } = await Movie.findAndCountAll({
+      where: whereCondition, // 👈 여기에 장르 필터가 들어감!
       attributes: {
         include: [
-          // 🧠 핵심 로직: SQL에서 직접 승률 계산하기
-          // (matchCount가 0이면 0점으로 처리해서 에러 방지)
+          // 승률 계산 로직 (기존과 동일)
           [
             Sequelize.literal(
               "CASE WHEN matchCount = 0 THEN 0 ELSE (winCount / matchCount) * 100 END"
@@ -74,21 +84,22 @@ exports.getRanks = async (req, res) => {
         ],
       },
       order: [
-        [Sequelize.literal("winRate"), "DESC"], // 1순위: 승률 높은 순
-        ["matchCount", "DESC"], // 2순위: 경기수 많은 순 (동점자 처리)
-        ["name", "ASC"], // 3순위: 가나다 순
+        [Sequelize.literal("winRate"), "DESC"], // 승률 높은 순
+        ["matchCount", "DESC"], // 경기수 많은 순
+        ["name", "ASC"],
       ],
-      limit: limit, // 20개만 가져오기
-      offset: offset, // 건너뛰기
+      limit: limit,
+      offset: offset,
     });
 
-    // 3. 응답 보내기
+    // 4. 응답 보내기
     res.json({
       success: true,
       page: page,
-      totalMovies: count, // 전체 영화 수
-      totalPages: Math.ceil(count / limit), // 전체 페이지 수
-      data: rows, // 이번 페이지 데이터 (20개)
+      genre: genre || "ALL", // 현재 무슨 장르 랭킹인지 알려줌
+      totalMovies: count, // 해당 장르의 총 영화 수
+      totalPages: Math.ceil(count / limit),
+      data: rows,
     });
   } catch (err) {
     console.error(err);
