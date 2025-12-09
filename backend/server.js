@@ -3,7 +3,7 @@ const cors = require("cors");
 const sequelize = require("./config/db");
 const movieRoutes = require("./routes/movieRoutes");
 const initData = require("./utils/initData");
-
+const authRoutes = require("./routes/authRoutes");
 const app = express();
 
 // 미들웨어
@@ -12,7 +12,7 @@ app.use(express.json());
 
 // 라우터 연결
 app.use("/api", movieRoutes);
-
+app.use("/api/auth", authRoutes);
 // 서버 실행 및 DB 연결
 const startServer = async () => {
   try {
