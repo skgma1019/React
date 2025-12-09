@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 // 비밀키 (나중에 .env 파일로 빼는 게 좋습니다)
-const JWT_SECRET = "my_super_secret_key_1234";
+const JWT_SECRET = "은찬의아이";
 
 // 1. 회원가입
 exports.signup = async (req, res) => {
