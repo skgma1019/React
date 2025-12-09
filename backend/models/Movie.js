@@ -13,6 +13,10 @@ const Movie = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    img: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     genreIds: {
       type: DataTypes.JSON, // 핵심: 배열 저장용
       allowNull: true,
