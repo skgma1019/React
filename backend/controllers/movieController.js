@@ -109,9 +109,15 @@ exports.getRanks = async (req, res) => {
   }
 };
 ``;
-
 exports.getRecommendations = async (req, res) => {
-  const { movieId } = req.params;
+  // 👇 [수정됨] req.params 대신 req.query 사용!
+  // 요청 URL 예시: /api/game/recommend?movieId=123
+  const { movieId } = req.query;
+
+  // 🛡️ 안전장치: movieId가 없으면 Python 돌리지 말고 바로 에러 반환
+  if (!movieId) {
+    return res.status(400).json({ error: "movieId 파라미터가 필요합니다." });
+  }
 
   // 1. 파이썬 스크립트 경로 (utils 폴더 안에 있음)
   const pythonScriptPath = path.join(__dirname, "../utils/recommend_movie.py");
