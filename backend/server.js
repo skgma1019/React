@@ -20,7 +20,7 @@ const startServer = async () => {
     await sequelize.sync(); // 테이블 생성
     console.log("💾 DB 연결 성공!");
 
-    await initData(); // 데이터 적재 실행
+    // await initData(); // 데이터 적재 실행
 
     app.listen(8080, () => {
       console.log("🚀 서버 가동 중: http://localhost:8080");
