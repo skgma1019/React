@@ -1,4 +1,6 @@
 const { Sequelize } = require("sequelize");
+const { spawn } = require("child_process");
+const path = require("path");
 const Movie = require("../models/Movie");
 
 // 1. 게임 후보 뽑기
@@ -105,4 +107,50 @@ exports.getRanks = async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "랭킹 조회 실패" });
   }
+};
+``;
+
+exports.getRecommendations = async (req, res) => {
+  const { movieId } = req.params;
+
+  // 1. 파이썬 스크립트 경로 (utils 폴더 안에 있음)
+  const pythonScriptPath = path.join(__dirname, "../utils/recommend_movie.py");
+
+  // 2. 파이썬 실행
+  const pythonProcess = spawn("python", [pythonScriptPath, movieId]);
+  // ⚠️ 주의: Mac/Linux는 'python3'라고 써야 할 수도 있습니다!
+
+  let resultData = "";
+
+  // 3. 데이터 받기 (stdout)
+  pythonProcess.stdout.on("data", (data) => {
+    resultData += data.toString();
+  });
+
+  // 4. 에러 로그 (stderr)
+  pythonProcess.stderr.on("data", (data) => {
+    console.error(`🐍 Python Error: ${data}`);
+  });
+
+  // 5. 종료 시 응답
+  pythonProcess.on("close", (code) => {
+    if (code !== 0) {
+      console.error(`Python script exited with code ${code}`);
+      return res.status(500).json({ error: "추천 시스템 오류" });
+    }
+
+    try {
+      // 파이썬이 준 JSON 문자열을 진짜 자바스크립트 객체로 변환
+      const recommendations = JSON.parse(resultData);
+
+      console.log(
+        `✨ 영화 ID ${movieId}에 대한 추천 ${recommendations.length}개 완료`
+      );
+      res.json(recommendations);
+    } catch (err) {
+      console.error("JSON 파싱 실패:", err);
+      // 파싱 실패해도 에러 띄우지 말고 빈 배열 주거나 로그 확인
+      res.json([]);
+    }
+  });
 };

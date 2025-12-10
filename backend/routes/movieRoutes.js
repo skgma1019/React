@@ -6,5 +6,6 @@ const movieController = require("../controllers/movieController");
 router.get("/game/candidates", movieController.getCandidates); // 후보 뽑기
 router.post("/game/result", movieController.saveResult); // 결과 저장
 router.get("/ranks", movieController.getRanks); // 랭킹 조회
+router.get("/game/recommend/:movieId", movieController.getRecommendations);
 
 module.exports = router;
